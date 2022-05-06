@@ -1,8 +1,9 @@
 function [zI,zQ,A,tau] = receiver(y)
-fs = length(y)/6.025;
+fs = 400000;
+seconds = length(y)/fs;
 B = 10000;
-int = [135000 155000];
-t = linspace(0,6.025,fs*6.025);
+int = [125000 145000];
+t = linspace(0,seconds,fs*seconds);
 N = 500;
 
 %filter"s
@@ -15,7 +16,7 @@ s = s((N/2)+1:end);
 s = [s; zeros((N/2),1)];
 
 %Demodulate
-ts = 2*pi.*145000.*t;
+ts = 2*pi.*135000.*t;
 zI_t = s.*2.*cos(ts');
 zI_t = filter(blp,alp,zI_t);
 zI_t = zI_t((N/2)+1:end);
@@ -34,13 +35,13 @@ cc = [zeros(2000000,1) ; chirp(tc,0,1,200)' ; zeros(10000,1) ];
 [qQ,lagQ] = xcorr(zQ_t,cc);
 
 [auto,lag] = xcorr(cc,cc);
-figure;
 
-plot(lag/fs,auto)
-title('Autokorrelation av en chrirpsignal')
-xlabel('\lambda (sekunder)')
-ylabel('r_{c}(\lambda)')
-
+%figure;
+%plot(lagQ/fs,qQ)
+%title('Autokorrelation av en chrirpsignal')
+%xlabel('\lambda (sekunder)')
+%ylabel('r_{c}(\lambda)')
+plot_sig(lagI,qI,fs)
 
 
 II = find(abs(qI)==max(abs(qI)));
@@ -91,8 +92,8 @@ else
 end
 
 % correct signals according to A
-zI = zI*(1/A);
-zQ = zQ*(1/A);
+zI = zI*(1/(A));
+zQ = zQ*(1/(A));
 
 
 %filter and downsample signals
@@ -108,8 +109,8 @@ zQ = zQ*20;
 zI = zI(1:end-10);
 zI = [zI ; zeros(10,1)];
 
-A = round(A,1);
-tau = round(tau*1e6,2);
+A = round(A,1)
+tau = round(tau*1e6,2)
 end
 
 %filterera
